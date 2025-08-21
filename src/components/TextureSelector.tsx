@@ -35,7 +35,7 @@ export default function TextureSelector() {
             `}
             onClick={() => {
               console.log('🖱️ TextureSelector 클릭:', { index, isLoading });
-              !isLoading && selectTexture(index);
+              if (!isLoading) selectTexture(index);
             }}
           >
             {/* 썸네일 */}

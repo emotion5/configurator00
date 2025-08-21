@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { generateTextureParameters, TextureResponse } from '@/lib/claude-api';
-import { generateProceduralTexture, generateTextureOptions } from '@/lib/texture-generator';
+import { generateTextureOptions } from '@/lib/texture-generator';
 
 export interface TextureOption {
   canvas: HTMLCanvasElement;

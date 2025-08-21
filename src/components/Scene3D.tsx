@@ -2,13 +2,13 @@
 
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Sphere } from '@react-three/drei'
-import { Suspense, useMemo, useEffect, useState } from 'react'
+import { Suspense, useMemo } from 'react'
 import * as THREE from 'three'
 import { TextureResponse } from '@/lib/claude-api'
 
 interface SphereMeshProps {
-  textureCanvas?: HTMLCanvasElement;
-  textureParams?: TextureResponse;
+  textureCanvas?: HTMLCanvasElement | null;
+  textureParams?: TextureResponse | null;
 }
 
 function SphereMesh({ textureCanvas, textureParams }: SphereMeshProps) {
@@ -104,17 +104,10 @@ function Lighting() {
   )
 }
 
-function Loading() {
-  return (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-gray-500">3D 모델 로딩 중...</div>
-    </div>
-  )
-}
 
 interface Scene3DProps {
-  textureCanvas?: HTMLCanvasElement;
-  textureParams?: TextureResponse;
+  textureCanvas?: HTMLCanvasElement | null;
+  textureParams?: TextureResponse | null;
 }
 
 export default function Scene3D({ textureCanvas, textureParams }: Scene3DProps) {
