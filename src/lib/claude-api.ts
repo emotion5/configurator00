@@ -4,8 +4,15 @@ export interface TextureRequest {
   complexity?: 'low' | 'medium' | 'high';
 }
 
+export interface ColorOption {
+  hex: string;
+  name: string;
+  description: string;
+}
+
 export interface TextureResponse {
-  colors: string[];
+  colors: string[]; // 기존 호환성을 위해 유지
+  colorOptions: ColorOption[];
   pattern: 'noise' | 'geometric' | 'organic' | 'metallic';
   roughness: number;
   metalness: number;

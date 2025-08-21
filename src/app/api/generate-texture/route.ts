@@ -7,8 +7,15 @@ interface TextureRequest {
   complexity?: 'low' | 'medium' | 'high';
 }
 
+interface ColorOption {
+  hex: string;
+  name: string;
+  description: string;
+}
+
 interface TextureResponse {
   colors: string[];
+  colorOptions: ColorOption[];
   pattern: 'noise' | 'geometric' | 'organic' | 'metallic';
   roughness: number;
   metalness: number;
@@ -55,6 +62,11 @@ export async function POST(request: NextRequest) {
 
 {
   "colors": ["#색상1", "#색상2", "#색상3"],
+  "colorOptions": [
+    {"hex": "#색상1", "name": "간단한이름1", "description": "색상설명1"},
+    {"hex": "#색상2", "name": "간단한이름2", "description": "색상설명2"},
+    {"hex": "#색상3", "name": "간단한이름3", "description": "색상설명3"}
+  ],
   "pattern": "noise|geometric|organic|metallic",
   "roughness": 0.0~1.0 사이의 숫자,
   "metalness": 0.0~1.0 사이의 숫자,
@@ -63,9 +75,8 @@ export async function POST(request: NextRequest) {
 }
 
 예시:
-- "거친 금속 표면" → {"colors": ["#silver", "#gray", "#darkgray"], "pattern": "metallic", "roughness": 0.8, "metalness": 0.9, "scale": 1.2, "seed": 123}
-- "네온 사이버펑크" → {"colors": ["#ff00ff", "#00ffff", "#ff0080"], "pattern": "geometric", "roughness": 0.1, "metalness": 0.0, "scale": 2.0, "seed": 456}
-- "나무 껍질" → {"colors": ["#8b4513", "#654321", "#a0522d"], "pattern": "organic", "roughness": 0.9, "metalness": 0.0, "scale": 1.5, "seed": 789}`
+- "수박 텍스처" → {"colors": ["#4ca832", "#ff2b2b", "#e8f3e8"], "colorOptions": [{"hex": "#4ca832", "name": "겉껍질", "description": "수박의 진한 초록 겉면"}, {"hex": "#ff2b2b", "name": "속살", "description": "수박의 달콤한 빨간 과육"}, {"hex": "#e8f3e8", "name": "씨 부분", "description": "수박씨 주변의 연한 부분"}], "pattern": "organic", "roughness": 0.6, "metalness": 0.0, "scale": 1.8, "seed": 345}
+- "거친 금속 표면" → {"colors": ["#c0c0c0", "#808080", "#404040"], "colorOptions": [{"hex": "#c0c0c0", "name": "밝은 금속", "description": "반사되는 밝은 표면"}, {"hex": "#808080", "name": "기본 금속", "description": "일반적인 금속 색상"}, {"hex": "#404040", "name": "그림자", "description": "움푹 패인 어두운 부분"}], "pattern": "metallic", "roughness": 0.8, "metalness": 0.9, "scale": 1.2, "seed": 123}`
       }]
     });
 
@@ -108,6 +119,11 @@ export async function POST(request: NextRequest) {
     // 폴백 텍스처 파라미터 제공
     const fallbackTexture: TextureResponse = {
       colors: ['#ffffff', '#cccccc', '#999999'],
+      colorOptions: [
+        {hex: '#ffffff', name: '밝은색', description: '기본 밝은 텍스처'},
+        {hex: '#cccccc', name: '중간색', description: '중간 톤 텍스처'},
+        {hex: '#999999', name: '어두운색', description: '어두운 톤 텍스처'}
+      ],
       pattern: 'noise',
       roughness: 0.5,
       metalness: 0.1,

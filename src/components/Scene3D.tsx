@@ -1,43 +1,53 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Icosahedron } from '@react-three/drei'
-import { Suspense, useMemo } from 'react'
+import { OrbitControls, Sphere } from '@react-three/drei'
+import { Suspense, useMemo, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { TextureResponse } from '@/lib/claude-api'
 
-interface IcosahedronMeshProps {
+interface SphereMeshProps {
   textureCanvas?: HTMLCanvasElement;
   textureParams?: TextureResponse;
 }
 
-function IcosahedronMesh({ textureCanvas, textureParams }: IcosahedronMeshProps) {
+function SphereMesh({ textureCanvas, textureParams }: SphereMeshProps) {
+  // 간단한 키 기반 강제 업데이트
+  const textureKey = useMemo(() => Math.random(), [textureCanvas]);
+
   const texture = useMemo(() => {
     if (textureCanvas) {
+      console.log('🔄 Scene3D: 새 텍스처 생성:', textureKey);
       const tex = new THREE.CanvasTexture(textureCanvas);
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
       tex.needsUpdate = true;
+      tex.flipY = false;
       return tex;
     }
     return null;
-  }, [textureCanvas]);
+  }, [textureCanvas, textureKey]);
 
   const materialProps = useMemo(() => {
-    if (textureParams) {
-      // 색상을 더 잘 보이도록 설정
-      const baseColor = textureParams.colors[0] || '#ffffff';
-      
+    if (textureParams && texture) {
+      // 텍스처가 있을 때는 텍스처 색상이 잘 보이도록 설정
       return {
         map: texture,
-        color: baseColor, // 텍스처가 있어도 기본 색상 유지
-        roughness: Math.max(0.1, textureParams.roughness), // 너무 매끄럽지 않게
-        metalness: Math.min(0.8, textureParams.metalness), // 너무 금속적이지 않게
-        // 색상이 더 잘 보이도록 추가 설정
+        color: '#ffffff', // 흰색으로 설정하여 텍스처 원본 색상 유지
+        roughness: Math.max(0.1, textureParams.roughness),
+        metalness: Math.min(0.8, textureParams.metalness),
         transparent: false,
         opacity: 1.0,
-        emissive: baseColor, // 약간의 발광 효과
-        emissiveIntensity: 0.05, // 발광을 줄여서 텍스처 디테일 살리기
+      };
+    } else if (textureParams) {
+      // 텍스처가 없지만 파라미터가 있을 때는 기본 색상 사용
+      const baseColor = textureParams.colors[0] || '#ffffff';
+      return {
+        color: baseColor,
+        roughness: Math.max(0.1, textureParams.roughness),
+        metalness: Math.min(0.8, textureParams.metalness),
+        transparent: false,
+        opacity: 1.0,
       };
     }
     return {
@@ -50,9 +60,9 @@ function IcosahedronMesh({ textureCanvas, textureParams }: IcosahedronMeshProps)
   }, [texture, textureParams]);
 
   return (
-    <Icosahedron args={[1, 0]} position={[0, 0, 0]}>
-      <meshStandardMaterial {...materialProps} />
-    </Icosahedron>
+    <Sphere args={[1.2, 32, 32]} position={[0, 0, 0]}>
+      <meshStandardMaterial key={textureKey} {...materialProps} />
+    </Sphere>
   )
 }
 
@@ -108,6 +118,12 @@ interface Scene3DProps {
 }
 
 export default function Scene3D({ textureCanvas, textureParams }: Scene3DProps) {
+  console.log('🔍 Scene3D props 변경:', { 
+    hasCanvas: !!textureCanvas, 
+    hasParams: !!textureParams,
+    canvasId: textureCanvas ? textureCanvas.toString() : 'none'
+  });
+  
   return (
     <div className="w-full h-full bg-gray-900">
       <Canvas
@@ -120,7 +136,7 @@ export default function Scene3D({ textureCanvas, textureParams }: Scene3DProps) 
       >
         <Suspense fallback={null}>
           <Lighting />
-          <IcosahedronMesh 
+          <SphereMesh 
             textureCanvas={textureCanvas}
             textureParams={textureParams}
           />

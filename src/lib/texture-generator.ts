@@ -2,7 +2,7 @@ import { createNoise2D } from 'simplex-noise';
 import chroma from 'chroma-js';
 import { TextureResponse } from './claude-api';
 
-export function generateProceduralTexture(params: TextureResponse, size: number = 512): HTMLCanvasElement {
+export function generateProceduralTexture(params: TextureResponse, size: number = 512, colorIndex?: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -11,10 +11,22 @@ export function generateProceduralTexture(params: TextureResponse, size: number 
   // 시드로 노이즈 함수 생성
   const noise2D = createNoise2D(() => params.seed / 1000);
 
-  // 색상 팔레트 생성 - 더 생생한 색상을 위해 saturate 추가
-  const colorScale = chroma.scale(params.colors)
-    .mode('lch')
-    .correctLightness(true);
+  // 색상 선택: colorIndex가 있으면 단일 색상, 없으면 기존 방식 (호환성)
+  let colorScale: chroma.Scale;
+  if (colorIndex !== undefined && params.colorOptions && params.colorOptions[colorIndex]) {
+    // 단일 색상 기반 팔레트 생성 (명도 변화)
+    const baseColor = chroma(params.colorOptions[colorIndex].hex);
+    const lighterColor = baseColor.brighten(1.5);
+    const darkerColor = baseColor.darken(1.5);
+    colorScale = chroma.scale([darkerColor, baseColor, lighterColor])
+      .mode('lch')
+      .correctLightness(true);
+  } else {
+    // 기존 방식 (색상 배열 혼합)
+    colorScale = chroma.scale(params.colors)
+      .mode('lch')
+      .correctLightness(true);
+  }
 
   // 패턴별 텍스처 생성
   switch (params.pattern) {
@@ -35,6 +47,23 @@ export function generateProceduralTexture(params: TextureResponse, size: number 
   }
 
   return canvas;
+}
+
+// 3개 색상 옵션에 대한 텍스처 배열 생성
+export function generateTextureOptions(params: TextureResponse, size: number = 512): HTMLCanvasElement[] {
+  const textures: HTMLCanvasElement[] = [];
+  
+  if (params.colorOptions && params.colorOptions.length > 0) {
+    // 새로운 방식: 각 색상 옵션별로 텍스처 생성
+    for (let i = 0; i < params.colorOptions.length; i++) {
+      textures.push(generateProceduralTexture(params, size, i));
+    }
+  } else {
+    // 폴백: 기존 방식으로 1개 텍스처만 생성
+    textures.push(generateProceduralTexture(params, size));
+  }
+  
+  return textures;
 }
 
 function generateNoiseTexture(
