@@ -12,7 +12,8 @@ interface SphereMeshProps {
 }
 
 function SphereMesh({ textureCanvas, textureParams }: SphereMeshProps) {
-  // 간단한 키 기반 강제 업데이트
+  // 텍스처 강제 업데이트를 위한 키 (ESLint 경고 무시)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const textureKey = useMemo(() => Math.random(), [textureCanvas]);
 
   const texture = useMemo(() => {
